@@ -3,101 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Mini App - Trade</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    h1, h2, h3 {
-      color: #333;
-    }
-    .deposit-withdraw-section {
-      max-width: 450px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .qr-container {
-      margin-bottom: 20px;
-    }
-    .qr-container img {
-      border: 2px solid #ccc;
-      border-radius: 12px;
-      padding: 10px;
-      width: 200px;
-    }
-    button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    .deposit-btn {
-      background-color: #28a745;
-      color: white;
-    }
-    .withdraw-btn {
-      background-color: #dc3545;
-      color: white;
-    }
-    .trade-btn {
-      background-color: #007bff;
-      color: white;
-      margin: 10px 5px;
-    }
-  </style>
+  <title>Crypto Mini Trading</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>📊 Crypto Mini Trading</h1>
 
-  <h1>💹 Crypto Mini App - Trade</h1>
+  <!-- BALANCES -->
+  <div class="balances">
+    <p>Demo Balance: <span id="demo-balance">$1000.00</span></p>
+    <p>Real Balance: <span id="real-balance">$0.00</span></p>
+  </div>
 
-  <!-- Deposit & Withdraw Section -->
+  <!-- TRADE SECTION -->
+  <div class="trade-section">
+    <input type="number" id="trade-amount" placeholder="Trade Amount ($1-$1000)">
+    <select id="trade-mode">
+      <option value="demo">Demo</option>
+      <option value="real">Real</option>
+    </select>
+
+    <select id="market-select">
+      <option value="BTCUSDT">BTC/USDT</option>
+      <option value="ETHUSDT">ETH/USDT</option>
+      <option value="BNBUSDT">BNB/USDT</option>
+    </select>
+
+    <select id="interval-select">
+      <option value="1m">1 Minute</option>
+      <option value="2m">2 Minutes</option>
+      <option value="5m">5 Minutes</option>
+    </select>
+
+    <button id="trade-btn">Place Trade</button>
+  </div>
+
+  <!-- TRADE HISTORY -->
+  <h2>📜 Trade History</h2>
+  <div id="trade-history"></div>
+
+  <!-- DEPOSIT & WITHDRAW SECTION -->
   <div class="deposit-withdraw-section">
     <h2>💰 Deposit Options</h2>
     <p>Send payment via Binance Pay or USDT BEP20. Scan the QR code below:</p>
     
-    <!-- Binance Pay QR -->
     <div class="qr-container">
       <h3>Binance Pay</h3>
-      <img src="images/binancepay_qr.png" alt="Binance Pay QR">
+      <img src="images/binancepay_qr.png" alt="Binance Pay QR" width="200">
       <p>Binance Pay ID: <strong>1067192363</strong></p>
     </div>
 
-    <!-- USDT BEP20 QR -->
     <div class="qr-container">
       <h3>USDT BEP20</h3>
-      <img src="images/usdt_qr.png" alt="USDT BEP20 QR">
+      <img src="images/usdt_qr.png" alt="USDT BEP20 QR" width="200">
       <p>Wallet Address: <strong>0xc81a5e96f13dc90878bd5b9d98e4ea024497d537</strong></p>
     </div>
 
-    <!-- Deposit Button -->
-    <button class="deposit-btn" onclick="alert('Deposit functionality coming soon!')">Deposit Now</button>
+    <button onclick="alert('Deposit functionality coming soon!')" class="deposit-btn">Deposit Now</button>
 
-    <hr style="margin: 20px 0;">
+    <hr>
 
     <h2>💸 Withdraw Options</h2>
-    <p>Request withdrawal to your account:</p>
-
-    <!-- Withdraw Button -->
-    <button class="withdraw-btn" onclick="alert('Withdraw functionality coming soon!')">Withdraw Now</button>
+    <button onclick="alert('Withdraw functionality coming soon!')" class="withdraw-btn">Withdraw Now</button>
   </div>
 
-  <!-- Demo & Real Trade Section -->
-  <div class="deposit-withdraw-section">
-    <h2>📊 Trade Options</h2>
-    <p>Choose your trading mode:</p>
-    <button class="trade-btn" onclick="alert('Demo Trade coming soon!')">Demo Trade</button>
-    <button class="trade-btn" onclick="alert('Real Trade coming soon!')">Real Trade</button>
-  </div>
-
+  <script src="app.js"></script>
 </body>
 </html>
-
