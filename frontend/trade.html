@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Mini App</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #333; }
+        #chart { width: 100%; height: 400px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Crypto Mini App</h1>
+    <div id="chart">
+        <p>Loading candlestick chart...</p>
+    </div>
+    <button onclick="alert('Deposit clicked!')">Deposit</button>
+    <button onclick="alert('Withdraw clicked!')">Withdraw</button>
+
+    <script>
+        // Example: QuickChart Candlestick
+        const chartDiv = document.getElementById('chart');
+        const chartUrl = 'https://quickchart.io/chart?c={type:"candlestick",data:{labels:["1","2","3"],datasets:[{label:"BTC/USDT",data:[{o:45000,h:47000,l:44000,c:46000},{o:46000,h:48000,l:45500,c:47000},{o:47000,h:49000,l:46500,c:48000}]}]}}';
+        chartDiv.innerHTML = `<img src="${chartUrl}" alt="Candlestick Chart" style="width:100%;">`;
+    </script>
+</body>
+</html>
