@@ -1,29 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Mini App</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        h1 { color: #333; }
-        #chart { width: 100%; height: 400px; }
-        button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Mini App - Trade</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    .deposit-withdraw-section {
+      max-width: 450px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .qr-container {
+      margin-bottom: 20px;
+    }
+    .qr-container img {
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      padding: 10px;
+      width: 200px;
+    }
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .deposit-btn {
+      background-color: #28a745;
+      color: white;
+    }
+    .withdraw-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+    .trade-btn {
+      background-color: #007bff;
+      color: white;
+      margin: 10px 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to Crypto Mini App</h1>
-    <div id="chart">
-        <p>Loading candlestick chart...</p>
-    </div>
-    <button onclick="alert('Deposit clicked!')">Deposit</button>
-    <button onclick="alert('Withdraw clicked!')">Withdraw</button>
 
-    <script>
-        // Example: QuickChart Candlestick
-        const chartDiv = document.getElementById('chart');
-        const chartUrl = 'https://quickchart.io/chart?c={type:"candlestick",data:{labels:["1","2","3"],datasets:[{label:"BTC/USDT",data:[{o:45000,h:47000,l:44000,c:46000},{o:46000,h:48000,l:45500,c:47000},{o:47000,h:49000,l:46500,c:48000}]}]}}';
-        chartDiv.innerHTML = `<img src="${chartUrl}" alt="Candlestick Chart" style="width:100%;">`;
-    </script>
+  <h1>💹 Crypto Mini App - Trade</h1>
+
+  <!-- Deposit & Withdraw Section -->
+  <div class="deposit-withdraw-section">
+    <h2>💰 Deposit Options</h2>
+    <p>Send payment via Binance Pay or USDT BEP20. Scan the QR code below:</p>
+    
+    <!-- Binance Pay QR -->
+    <div class="qr-container">
+      <h3>Binance Pay</h3>
+      <img src="images/binancepay_qr.png" alt="Binance Pay QR">
+      <p>Binance Pay ID: <strong>1067192363</strong></p>
+    </div>
+
+    <!-- USDT BEP20 QR -->
+    <div class="qr-container">
+      <h3>USDT BEP20</h3>
+      <img src="images/usdt_qr.png" alt="USDT BEP20 QR">
+      <p>Wallet Address: <strong>0xc81a5e96f13dc90878bd5b9d98e4ea024497d537</strong></p>
+    </div>
+
+    <!-- Deposit Button -->
+    <button class="deposit-btn" onclick="alert('Deposit functionality coming soon!')">Deposit Now</button>
+
+    <hr style="margin: 20px 0;">
+
+    <h2>💸 Withdraw Options</h2>
+    <p>Request withdrawal to your account:</p>
+
+    <!-- Withdraw Button -->
+    <button class="withdraw-btn" onclick="alert('Withdraw functionality coming soon!')">Withdraw Now</button>
+  </div>
+
+  <!-- Demo & Real Trade Section -->
+  <div class="deposit-withdraw-section">
+    <h2>📊 Trade Options</h2>
+    <p>Choose your trading mode:</p>
+    <button class="trade-btn" onclick="alert('Demo Trade coming soon!')">Demo Trade</button>
+    <button class="trade-btn" onclick="alert('Real Trade coming soon!')">Real Trade</button>
+  </div>
+
 </body>
 </html>
+
