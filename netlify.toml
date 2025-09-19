@@ -1,4 +1,8 @@
 [build]
-  base = "frontend"
   publish = "frontend"
-  command = ""   # ফ্রন্টএন্ড static হলে build command লাগবে না
+  command = ""
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
