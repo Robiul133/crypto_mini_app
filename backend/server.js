@@ -4,11 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const TelegramBot = require('node-telegram-bot-api');
-
+const nodemailer = require('nodemailer');
 const db = require('./database');
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://crypto-mini-bot.netlify.app/'; // set env
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://crypto-mini-bot.netlify.app/';
 const PORT = process.env.PORT || 4000;
 
 if (!TELEGRAM_TOKEN) {
@@ -16,7 +16,7 @@ if (!TELEGRAM_TOKEN) {
   process.exit(1);
 }
 
-/* ------------------ Telegram Bot (simple) ------------------ */
+/* ------------------ Telegram Bot ------------------ */
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 console.log('Telegram bot started.');
 
@@ -68,20 +68,56 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// simple endpoints to be used by frontend
-// NOTE: in production protect these with auth (session/jwt)
-app.get('/api/user/:id', (req, res) => {
-  const user = db.getUser(String(req.params.id)) || null;
-  res.json({ ok: true, user });
+/* ---------------------- Nodemailer ---------------------- */
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
 });
 
-app.post('/api/create_user', (req, res) => {
-  const { id, username } = req.body;
-  const user = db.addUser(String(id), username || null);
-  res.json({ ok:true, user });
+/* ---------------------- User APIs ---------------------- */
+app.post('/api/register', async (req,res)=>{
+  const {firstName,lastName,email,password} = req.body;
+  if(db.getUserByEmail(email)) return res.json({ok:false,error:'Email already registered'});
+
+  const verificationCode = Math.floor(100000 + Math.random()*900000);
+  const user = db.addUserWithEmail(firstName,lastName,email,password,verificationCode);
+
+  await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: 'Verify your Crypto Mini Account',
+    text: `Your verification code: ${verificationCode}`
+  });
+
+  res.json({ok:true,message:'Verification code sent to email'});
 });
 
-// record trade result (frontend triggers when trade resolves)
+app.post('/api/verify-email',(req,res)=>{
+  const {email,code} = req.body;
+  const user = db.getUserByEmail(email);
+  if(!user) return res.json({ok:false,error:'User not found'});
+  if(user.verificationCode != code) return res.json({ok:false,error:'Invalid code'});
+
+  user.verified = true;
+  db.save();
+  res.json({ok:true,message:'Email verified, you can login now'});
+});
+
+app.post('/api/login',(req,res)=>{
+  const {email,password} = req.body;
+  const user = db.getUserByEmail(email);
+  if(!user) return res.json({ok:false,error:'User not found'});
+  if(!user.verified) return res.json({ok:false,error:'Email not verified'});
+  if(user.password !== password) return res.json({ok:false,error:'Wrong password'});
+  res.json({ok:true,user});
+});
+
+/* ---------------------- Trade APIs ---------------------- */
 app.post('/api/trade', (req, res) => {
   const { userId, market, amount, direction, result, profit, mode } = req.body;
   const time = Date.now();
@@ -89,12 +125,10 @@ app.post('/api/trade', (req, res) => {
   db.addTrade(String(userId), tradeObj);
 
   if (result === 'win') {
-    // credit balance: for demo mode credit demoBalance; for real, credit realBalance
     const field = mode === 'demo' ? 'demoBalance' : 'realBalance';
     db.updateBalance(String(userId), field, profit);
-    // referral: if user has referrer, pay 2% of trade volume to referrer as referralEarned (not auto-withdraw)
     const user = db.getUser(String(userId));
-    if (user && user.referrerId) {
+    if(user && user.referrerId){
       const commission = amount * 0.02;
       db.addReferralEarned(String(user.referrerId), commission);
     }
@@ -105,27 +139,46 @@ app.post('/api/trade', (req, res) => {
   res.json({ ok:true, trade: tradeObj });
 });
 
-// deposit record - for manual admin credit later
-app.post('/api/deposit', (req, res) => {
-  const { userId, amount, method, txid } = req.body;
-  const obj = { userId, amount, method, txid, time: Date.now(), status: 'pending' };
-  db.addDeposit(String(userId), obj);
-  res.json({ ok:true, deposit: obj });
+/* ---------------------- Deposit & Withdraw APIs ---------------------- */
+app.post('/api/deposit',(req,res)=>{
+  const {userId,amount,method} = req.body;
+  const dep = db.addDeposit(userId,amount,method);
+  res.json({ok:true,deposit:dep});
 });
 
-// withdraw request
-app.post('/api/withdraw', (req, res) => {
-  const { userId, amount, address } = req.body;
-  const user = db.getUser(String(userId));
-  if (!user || user.realBalance < amount) return res.json({ ok:false, error:'Insufficient balance' });
-  const obj = { userId, amount, address, time: Date.now(), status: 'pending' };
-  db.addWithdrawal(String(userId), obj);
-  // hold realBalance until admin processes (optionally deduct instantly)
-  res.json({ ok:true, withdrawal: obj });
+app.post('/api/withdraw',(req,res)=>{
+  const {userId,amount,method,email} = req.body;
+  const user = db.getUser(userId);
+  if(!user) return res.json({ok:false,error:'User not found'});
+  if(user.realBalance < amount) return res.json({ok:false,error:'Insufficient balance'});
+
+  const code = Math.floor(100000 + Math.random()*900000);
+  user.withdrawCode = code;
+  db.save();
+
+  transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: 'Crypto Mini Withdraw Verification',
+    text: `Your withdraw verification code: ${code}`
+  });
+
+  res.json({ok:true,message:'Verification code sent to email'});
 });
 
-app.get('/', (req, res) => res.send('Mini App API running'));
+app.post('/api/confirm-withdraw',(req,res)=>{
+  const {userId,code,amount,method} = req.body;
+  const user = db.getUser(userId);
+  if(!user) return res.json({ok:false,error:'User not found'});
+  if(user.withdrawCode != code) return res.json({ok:false,error:'Invalid code'});
 
-app.listen(PORT, () => {
-  console.log(`API server listening on port ${PORT}`);
+  user.realBalance -= amount;
+  db.addWithdrawal(userId,amount,method);
+  user.withdrawCode = null;
+  db.save();
+  res.json({ok:true,message:'Withdraw successful'});
 });
+
+app.get('/',(req,res)=>res.send('Mini App API running'));
+
+app.listen(PORT,()=>console.log(`Server running on port ${PORT}`));

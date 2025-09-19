@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdraw - Crypto Mini App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>💸 Withdraw Funds</h2>
+
+  <div class="withdraw-section">
+    <p>Minimum Withdraw: $1</p>
+    <p>Maximum Withdraw: $1000</p>
+
+    <input type="number" id="withdraw-amount" placeholder="Enter amount ($)" min="1" max="1000">
+    <input type="text" id="withdraw-address" placeholder="Enter Binance Pay ID or USDT BEP20 Address">
+    <input type="text" id="email-code" placeholder="Email verification code">
+    <button onclick="makeWithdraw()">Withdraw Now</button>
+  </div>
+
+  <button onclick="goToTrade()">⬅ Back to Trading</button>
+
+  <script>
+    const USER_ID = localStorage.getItem("userId");
+
+    if(!USER_ID) {
+      alert("Please login first");
+      window.location.href = "index.html";
+    }
+
+    async function makeWithdraw() {
+      const amount = parseFloat(document.getElementById("withdraw-amount").value);
+      const address = document.getElementById("withdraw-address").value;
+      const code = document.getElementById("email-code").value;
+
+      if(isNaN(amount) || amount < 1 || amount > 1000) return alert("Enter valid amount between $1-$1000");
+      if(!address) return alert("Enter withdrawal address");
+      if(!code) return alert("Enter email verification code");
+
+      try {
+        const res = await fetch('http://localhost:4000/api/withdraw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: USER_ID,
+            amount,
+            address,
+            emailCode: code
+          })
+        });
+        const data = await res.json();
+        if(data.ok) alert("Withdraw request submitted! Status: pending");
+        else alert(data.error || "Withdraw failed");
+      } catch(e) {
+        console.error(e);
+        alert("Error connecting to server");
+      }
+    }
+
+    function goToTrade() {
+      window.location.href = "trade.html";
+    }
+  </script>
+</body>
+</html>

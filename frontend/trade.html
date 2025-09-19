@@ -1,72 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Mini Trading</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crypto Mini Trading — Live</title>
+
   <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js + financial plugin (candlestick) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.3.0/dist/chartjs-chart-financial.min.js"></script>
+
+  <style>
+    /* minimal embedded styles so page looks decent immediately */
+    body { font-family: Arial, sans-serif; margin:0; padding:0; text-align:center; background:#f6f8fb; color:#222; }
+    header{ background:#0b2f5a; color:#fff; padding:12px; }
+    header h1{ margin:0; font-size:18px; }
+    nav{ margin-top:8px; }
+    nav button{ margin:0 6px; padding:6px 10px; border-radius:6px; border:none; cursor:pointer; background:#fff; color:#0b2f5a; }
+    .container{ max-width:980px; margin:18px auto; padding:0 12px; }
+    .balances{ display:flex; gap:18px; justify-content:space-between; align-items:center; margin-bottom:12px; background:#fff; padding:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .balances p{ margin:0; font-size:14px; }
+    .trade-controls{ background:#fff; padding:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:12px; display:grid; grid-template-columns: 1fr 160px; gap:10px; align-items:center; }
+    .controls-left{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .controls-left input, .controls-left select { padding:8px; border-radius:6px; border:1px solid #ddd; min-width:140px; }
+    .controls-right{ display:flex; flex-direction:column; gap:8px; }
+    .big-btn{ padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .up{ background:#1f9d55; color:white; }
+    .down{ background:#e24b4b; color:white; }
+    #candleChart{ background:#fff; border-radius:8px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    #trade-history{ margin-top:12px; background:#fff; padding:10px; border-radius:8px; min-height:80px; text-align:left; overflow:auto; max-height:220px; }
+    .trade-entry{ padding:6px 8px; border-bottom:1px dashed #eee; font-size:13px; }
+    .small{ font-size:13px; color:#666; }
+    @media (max-width:720px){
+      .trade-controls{ grid-template-columns: 1fr; }
+      .controls-right{ flex-direction:row; }
+    }
+  </style>
 </head>
 <body>
-  <h1>📊 Crypto Mini Trading</h1>
+  <header>
+    <h1>📊 Crypto Mini Trading (Live Binance)</h1>
+    <nav>
+      <button onclick="showSection('trading')">Trading</button>
+      <button onclick="showSection('support')">Support</button>
+      <button onclick="showSection('profile')">Profile</button>
+      <button onclick="showSection('notification')">Notification</button>
+    </nav>
+  </header>
 
-  <!-- BALANCES -->
-  <div class="balances">
-    <p>Demo Balance: <span id="demo-balance">$1000.00</span></p>
-    <p>Real Balance: <span id="real-balance">$0.00</span></p>
-  </div>
-
-  <!-- TRADE SECTION -->
-  <div class="trade-section">
-    <input type="number" id="trade-amount" placeholder="Trade Amount ($1-$1000)">
-    <select id="trade-mode">
-      <option value="demo">Demo</option>
-      <option value="real">Real</option>
-    </select>
-
-    <select id="market-select">
-      <option value="BTCUSDT">BTC/USDT</option>
-      <option value="ETHUSDT">ETH/USDT</option>
-      <option value="BNBUSDT">BNB/USDT</option>
-    </select>
-
-    <select id="interval-select">
-      <option value="1m">1 Minute</option>
-      <option value="2m">2 Minutes</option>
-      <option value="5m">5 Minutes</option>
-    </select>
-
-    <button id="trade-btn">Place Trade</button>
-  </div>
-
-  <!-- TRADE HISTORY -->
-  <h2>📜 Trade History</h2>
-  <div id="trade-history"></div>
-
-  <!-- DEPOSIT & WITHDRAW SECTION -->
-  <div class="deposit-withdraw-section">
-    <h2>💰 Deposit Options</h2>
-    <p>Send payment via Binance Pay or USDT BEP20. Scan the QR code below:</p>
-    
-    <div class="qr-container">
-      <h3>Binance Pay</h3>
-      <img src="images/binancepay_qr.png" alt="Binance Pay QR" width="200">
-      <p>Binance Pay ID: <strong>1067192363</strong></p>
+  <div class="container">
+    <!-- balances -->
+    <div class="balances">
+      <p>Demo: <strong id="demo-balance">$1000.00</strong></p>
+      <p>Real: <strong id="real-balance">$0.00</strong></p>
+      <div>
+        <button id="reset-demo-btn" class="small">Reset Demo</button>
+      </div>
+      <div class="small">Live: <span id="live-price-display">—</span></div>
     </div>
 
-    <div class="qr-container">
-      <h3>USDT BEP20</h3>
-      <img src="images/usdt_qr.png" alt="USDT BEP20 QR" width="200">
-      <p>Wallet Address: <strong>0xc81a5e96f13dc90878bd5b9d98e4ea024497d537</strong></p>
+    <!-- trading controls -->
+    <div class="trade-controls">
+      <div class="controls-left">
+        <input id="trade-amount" type="number" placeholder="Amount $ (1 - 1000)" min="1" max="1000">
+        <select id="trade-mode">
+          <option value="demo">Demo</option>
+          <option value="real">Real</option>
+        </select>
+
+        <select id="market-select" onchange="onMarketChange()">
+          <option value="BTCUSDT">BTC/USDT</option>
+          <option value="ETHUSDT">ETH/USDT</option>
+          <option value="BNBUSDT">BNB/USDT</option>
+        </select>
+
+        <select id="interval-select">
+          <option value="1m">1 Minute</option>
+          <option value="5m">5 Minutes</option>
+          <option value="15m">15 Minutes</option>
+        </select>
+      </div>
+
+      <div class="controls-right">
+        <button id="btn-up" class="big-btn up">UP ⬆️</button>
+        <button id="btn-down" class="big-btn down">DOWN ⬇️</button>
+      </div>
     </div>
 
-    <button onclick="alert('Deposit functionality coming soon!')" class="deposit-btn">Deposit Now</button>
+    <!-- chart -->
+    <canvas id="candleChart" height="300"></canvas>
 
-    <hr>
+    <!-- trade history -->
+    <h3 style="margin-top:14px">📜 Trade History</h3>
+    <div id="trade-history"></div>
 
-    <h2>💸 Withdraw Options</h2>
-    <button onclick="alert('Withdraw functionality coming soon!')" class="withdraw-btn">Withdraw Now</button>
+    <!-- support/profile/notification placeholders -->
+    <div id="support" class="section hidden">
+      <h3>Support</h3>
+      <p>Telegram: <a href="https://t.me/cryptotradeappss" target="_blank">@cryptotradeappss</a></p>
+    </div>
+
+    <div id="profile" class="section hidden">
+      <h3>Profile</h3>
+      <p>Referral: <span id="ref-link">https://t.me/yourbot?start=ref_demo</span></p>
+    </div>
+
+    <div id="notification" class="section hidden">
+      <h3>Notifications</h3>
+      <p class="small">No notifications yet.</p>
+    </div>
   </div>
 
+  <!-- app.js will attach behavior -->
   <script src="app.js"></script>
 </body>
 </html>

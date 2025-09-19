@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Crypto Mini App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>👤 Your Profile</h2>
+  
+  <div class="profile-section">
+    <p><strong>Name:</strong> <span id="profile-name">Loading...</span></p>
+    <p><strong>Email:</strong> <span id="profile-email">Loading...</span></p>
+    <p><strong>Referral Link:</strong> <span id="ref-link">Loading...</span></p>
+    <p>Refer & Earn 2% commission on trade volume from referrals.</p>
+  </div>
+
+  <div class="password-change">
+    <h3>🔑 Change Password</h3>
+    <input type="password" id="current-password" placeholder="Current Password">
+    <input type="password" id="new-password" placeholder="New Password">
+    <input type="password" id="confirm-password" placeholder="Confirm Password">
+    <button onclick="changePassword()">Change Password</button>
+  </div>
+
+  <button onclick="goToTrade()">⬅ Back to Trading</button>
+
+  <script>
+    const USER_ID = localStorage.getItem("userId");
+
+    if(!USER_ID) {
+      alert("Please login first");
+      window.location.href = "index.html";
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await fetch(`http://localhost:4000/api/user/${USER_ID}`);
+        const data = await res.json();
+        if(data.ok && data.user) {
+          const user = data.user;
+          document.getElementById("profile-name").innerText = user.name || "N/A";
+          document.getElementById("profile-email").innerText = user.email || "N/A";
+          document.getElementById("ref-link").innerText = `https://t.me/yourbot?start=ref_${USER_ID}`;
+        }
+      } catch(e) {
+        console.error(e);
+        alert("Failed to load profile");
+      }
+    }
+
+    async function changePassword() {
+      const current = document.getElementById("current-password").value;
+      const newPass = document.getElementById("new-password").value;
+      const confirm = document.getElementById("confirm-password").value;
+
+      if(!current || !newPass || !confirm) return alert("All fields required");
+      if(newPass !== confirm) return alert("Passwords do not match");
+
+      try {
+        const res = await fetch(`http://localhost:4000/api/change_password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: USER_ID, currentPassword: current, newPassword: newPass })
+        });
+        const data = await res.json();
+        if(data.ok) {
+          alert("Password changed successfully!");
+          document.getElementById("current-password").value = "";
+          document.getElementById("new-password").value = "";
+          document.getElementById("confirm-password").value = "";
+        } else {
+          alert(data.error || "Failed to change password");
+        }
+      } catch(e) {
+        console.error(e);
+        alert("Error connecting to server");
+      }
+    }
+
+    function goToTrade() {
+      window.location.href = "trade.html";
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

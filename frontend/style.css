@@ -1,18 +1,63 @@
 body {
   font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
   text-align: center;
-  padding: 20px;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #28a745;
+header {
+  background-color: #222;
   color: white;
+  padding: 10px;
+}
+
+nav button {
+  margin: 0 5px;
+  padding: 8px 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #218838;
+nav button:hover {
+  background-color: #444;
+  color: white;
+}
+
+.balances {
+  margin: 15px auto;
+  max-width: 400px;
+  text-align: left;
+}
+
+.section {
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+.hidden {
+  display: none;
+}
+
+.trade-controls input, 
+.trade-controls select, 
+.trade-controls button {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.trade-entry {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+.deposit-withdraw-section {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.qr-container {
+  margin: 5px 0;
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Mini App - Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-container">
+    <!-- Register Form -->
+    <div id="register-form" class="form-box">
+      <h2>📝 Register</h2>
+      <form id="registerForm">
+        <input type="text" id="first-name" placeholder="First Name" required>
+        <input type="text" id="last-name" placeholder="Last Name" required>
+        <input type="email" id="register-email" placeholder="Email" required>
+        <input type="password" id="register-password" placeholder="Password" required>
+        <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+        <button type="submit" class="btn">Register</button>
+      </form>
+
+      <p class="or-text">or</p>
+      <button class="telegram-btn" id="telegramBtn">👉 Continue with Telegram</button>
+
+      <p>Already have an account? <a href="index.html">Login</a></p>
+    </div>
+  </div>
+
+  <script>
+    const registerForm = document.getElementById("registerForm");
+    const telegramBtn = document.getElementById("telegramBtn");
+
+    // Register form submit handler
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById("first-name").value.trim();
+      const lastName = document.getElementById("last-name").value.trim();
+      const email = document.getElementById("register-email").value.trim();
+      const password = document.getElementById("register-password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
+
+      if(password !== confirmPassword){
+        alert("Password and Confirm Password do not match!");
+        return;
+      }
+
+      // Call backend API to create user
+      try {
+        const res = await fetch("/api/create_user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName, lastName, email, password })
+        });
+        const data = await res.json();
+        if(data.ok){
+          alert(`Verification mail sent to: ${email}`);
+          // Redirect to login page
+          window.location.href = "index.html";
+        } else {
+          alert("Error creating account. Try again.");
+        }
+      } catch(err) {
+        console.error(err);
+        alert("Ser
