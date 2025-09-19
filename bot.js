@@ -1,18 +1,21 @@
-require('dotenv').config();
-const TelegramBot = require("node-telegram-bot-api");
+const { Telegraf } = require('telegraf');
+require('dotenv').config(); // .env থেকে টোকেন লোড
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(TOKEN, { polling: true });
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `👋 স্বাগতম Crypto Mini App এ!\n\nOpen Mini App করতে নিচের বাটন ক্লিক করুন।`, {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "🚀 Open Mini App", web_app: { url: "https://crypto-mini-bot.netlify.app/" } }],
-      ],
-    },
-  });
+// /start হ্যান্ডলার
+bot.start((ctx) => {
+  ctx.reply(
+    "Welcome to Crypto Mini Trading! Click below to open the trading app.",
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Open App", url: "https://crypto-mini-bot.netlify.app/" }]
+        ]
+      }
+    }
+  );
 });
 
+bot.launch();
 console.log("Bot is running...");
